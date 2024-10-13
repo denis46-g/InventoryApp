@@ -16,6 +16,9 @@
 
 package com.example.inventory.ui.item
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,6 +66,25 @@ class ItemDetailsViewModel(
 
     suspend fun deleteItem() {
         itemsRepository.deleteItem(uiState.value.itemDetails.toItem())
+    }
+
+    fun shareItem(context: Context){
+        val itemInformation =
+            "Item: ${uiState.value.itemDetails.toItem().name}\n" +
+                    "Price: ${uiState.value.itemDetails.toItem().price}\n" +
+                    "Quantity: ${uiState.value.itemDetails.toItem().quantity}\n" +
+                    "Provider name: ${uiState.value.itemDetails.toItem().providerName}\n" +
+                    "Provider email: ${uiState.value.itemDetails.toItem().providerEmail}\n" +
+                    "Provider phone: ${uiState.value.itemDetails.toItem().providerPhoneNumber}"
+
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, itemInformation)
+            type = "text/plain"
+        }
+
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        context.startActivity(shareIntent)
     }
 }
 
