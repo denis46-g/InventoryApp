@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -158,6 +159,13 @@ private fun ItemDetailsBody(
             Text(stringResource(R.string.sell))
         }
         OutlinedButton(
+            onClick = {  },
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.share))
+        }
+        OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth()
@@ -217,14 +225,35 @@ fun ItemDetails(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
             )
+            ItemDetailsRow(
+                labelResID = R.string.provider_name,
+                itemDetail = item.providerName,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
+            ItemDetailsRow(
+                labelResID = R.string.provider_email,
+                itemDetail = item.providerEmail,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
+            ItemDetailsRow(
+                labelResID = R.string.provider_phone_number,
+                itemDetail = item.providerPhoneNumber,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
         }
     }
 }
 
 @Composable
 private fun ItemDetailsRow(
-    @StringRes labelResID: Int, itemDetail: String, modifier: Modifier = Modifier
-) {
+    @StringRes labelResID: Int, itemDetail: String,
+    modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
         Text(stringResource(labelResID))
         Spacer(modifier = Modifier.weight(1f))

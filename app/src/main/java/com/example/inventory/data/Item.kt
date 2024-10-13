@@ -29,7 +29,7 @@ data class Item(
     val name: String,
     val price: Double,
     val quantity: Int,
-    //val providerName: String,
-    //val providerEmail: String,
-    //val providerPhoneNumber: String
+    val providerName: String,
+    val providerEmail: String,
+    val providerPhoneNumber: String
 )

@@ -186,6 +186,43 @@ private fun InventoryItem(
                 text = stringResource(R.string.in_stock, item.quantity),
                 style = MaterialTheme.typography.titleMedium
             )
+            Spacer(Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "Contacts",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = item.providerName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = item.providerEmail,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = item.providerPhoneNumber,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
         }
     }
 }
@@ -195,7 +232,9 @@ private fun InventoryItem(
 fun HomeBodyPreview() {
     InventoryTheme {
         HomeBody(listOf(
-            Item(1, "Game", 100.0, 20), Item(2, "Pen", 200.0, 30), Item(3, "TV", 300.0, 50)
+            Item(1, "Game", 100.0, 20, "John", "j@gmail.com", "2-305-305"),
+            Item(2, "Pen", 200.0, 30, "Stiv", "s@hr.ru", "3-543-321"),
+            Item(3, "TV", 300.0, 50, "Lepsi", "s@hy.ru", "3-543-322")
         ), onItemClick = {})
     }
 }
@@ -213,7 +252,7 @@ fun HomeBodyEmptyListPreview() {
 fun InventoryItemPreview() {
     InventoryTheme {
         InventoryItem(
-            Item(1, "Game", 100.0, 20),
+            Item(1, "Game", 100.0, 20, "John", "j@gmail.com", "2-305-305"),
         )
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -133,13 +134,23 @@ fun ItemInputForm(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
+        val isItemValid = itemDetails.name.isNotBlank()
+        val isPriceValid = isCorrectPrice(itemDetails.price)
+        val isQuantityValid = isCorrectQuantity(itemDetails.quantity)
+        val isProviderNameValid = isCorrectProviderName(itemDetails.providerName)
+        val isProviderEmailValid = isCorrectProviderEmail(itemDetails.providerEmail)
+        val isProviderPhoneNumberValid = isCorrectProviderPhoneNumber(itemDetails.providerPhoneNumber)
         OutlinedTextField(
             value = itemDetails.name,
             onValueChange = { onValueChange(itemDetails.copy(name = it)) },
             label = { Text(stringResource(R.string.item_name_req)) },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                focusedContainerColor =
+                if (isItemValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isItemValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
                 disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
             modifier = Modifier.fillMaxWidth(),
@@ -152,8 +163,12 @@ fun ItemInputForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             label = { Text(stringResource(R.string.item_price_req)) },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                focusedContainerColor =
+                if (isPriceValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isPriceValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
                 disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
             leadingIcon = { Text(Currency.getInstance(Locale.getDefault()).symbol) },
@@ -167,8 +182,63 @@ fun ItemInputForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(stringResource(R.string.quantity_req)) },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                focusedContainerColor =
+                if (isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = itemDetails.providerName,
+            onValueChange = { onValueChange(itemDetails.copy(providerName = it)) },
+            label = { Text(stringResource(R.string.provider_name_req)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor =
+                if (isProviderNameValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isProviderNameValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = itemDetails.providerEmail,
+            onValueChange = { onValueChange(itemDetails.copy(providerEmail = it)) },
+            label = { Text(stringResource(R.string.provider_email_req)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor =
+                if (isProviderEmailValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isProviderEmailValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = itemDetails.providerPhoneNumber,
+            onValueChange = { onValueChange(itemDetails.copy(providerPhoneNumber = it)) },
+            label = { Text(stringResource(R.string.provider_phone_number_req)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor =
+                if (isProviderPhoneNumberValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
+                unfocusedContainerColor =
+                if (isProviderPhoneNumberValid) MaterialTheme.colorScheme.secondaryContainer
+                else Color(0xFFFFC0CB),
                 disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
             modifier = Modifier.fillMaxWidth(),
