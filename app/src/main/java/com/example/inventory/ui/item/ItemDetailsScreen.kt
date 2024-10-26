@@ -17,6 +17,7 @@
 package com.example.inventory.ui.item
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,8 @@ import com.example.inventory.R
 import com.example.inventory.data.Item
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
+import com.example.inventory.ui.settings.SettingsViewModel
+import com.example.inventory.ui.settings.context
 import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 
@@ -152,9 +155,14 @@ private fun ItemDetailsBody(
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
 
+        val settings = SettingsViewModel()
+        val flagSensitiveData = settings.getCheckboxState(0)
+        val flagProhibitSendingData = settings.getCheckboxState(1)
+
         ItemDetails(
             item = itemDetailsUiState.itemDetails.toItem(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            flag = flagSensitiveData
         )
         Button(
             onClick = onSellItem,
@@ -167,9 +175,14 @@ private fun ItemDetailsBody(
         OutlinedButton(
             onClick = onShareItem,
             shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !flagProhibitSendingData
         ) {
-            Text(stringResource(R.string.share))
+
+            if(!flagProhibitSendingData)
+                Text(stringResource(R.string.share))
+            else
+                Text("Share (sending data is off with prohibit setting)")
         }
         OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
@@ -193,7 +206,7 @@ private fun ItemDetailsBody(
 
 @Composable
 fun ItemDetails(
-    item: Item, modifier: Modifier = Modifier
+    item: Item, modifier: Modifier = Modifier, flag: Boolean
 ) {
     Card(
         modifier = modifier,
@@ -233,21 +246,33 @@ fun ItemDetails(
             )
             ItemDetailsRow(
                 labelResID = R.string.provider_name,
-                itemDetail = item.providerName,
+                itemDetail =
+                    if (flag)
+                        "*".repeat(item.providerName.length)
+                    else
+                        item.providerName,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
             )
             ItemDetailsRow(
                 labelResID = R.string.provider_email,
-                itemDetail = item.providerEmail,
+                itemDetail =
+                    if (flag)
+                        "*".repeat(item.providerEmail.length)
+                    else
+                        item.providerEmail,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
             )
             ItemDetailsRow(
                 labelResID = R.string.provider_phone_number,
-                itemDetail = item.providerPhoneNumber,
+                itemDetail =
+                    if (flag)
+                        "*".repeat(item.providerPhoneNumber.length)
+                    else
+                        item.providerPhoneNumber,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )

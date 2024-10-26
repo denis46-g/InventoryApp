@@ -16,6 +16,7 @@
 
 package com.example.inventory.ui.home
 
+import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,10 +26,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +46,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +61,8 @@ import com.example.inventory.data.Item
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.item.formatedPrice
 import com.example.inventory.ui.navigation.NavigationDestination
+import com.example.inventory.ui.settings.SettingsViewModel
+import com.example.inventory.ui.settings.context
 import com.example.inventory.ui.theme.InventoryTheme
 
 object HomeDestination : NavigationDestination {
@@ -71,11 +78,14 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToItemEntry: () -> Unit,
     navigateToItemUpdate: (Int) -> Unit,
+    navigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val homeUiState by viewModel.homeUiState.collectAsState()
+
+    context = LocalContext.current as Activity
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -87,17 +97,36 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+            Row(
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_large))
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.item_entry_title)
-                )
+                Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_extra_large)))
+                FloatingActionButton(
+                    onClick = navigateToSettings,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.settings)
+                    )
+                }
+                Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.width)))
+                FloatingActionButton(
+                    onClick = navigateToItemEntry,
+                    shape = RectangleShape,
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.item_entry_title)
+                    )
+                }
             }
-        },
+        }
     ) { innerPadding ->
         HomeBody(
             itemList = homeUiState.itemList,
@@ -161,6 +190,8 @@ private fun InventoryList(
 private fun InventoryItem(
     item: Item, modifier: Modifier = Modifier
 ) {
+    val settings = SettingsViewModel()
+    val flagSensitiveData = settings.getCheckboxState(0)
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -201,7 +232,11 @@ private fun InventoryItem(
             ) {
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = item.providerName,
+                    text = if (flagSensitiveData)
+                        "*".repeat(item.providerName.length)
+                    else
+                        item.providerName
+                                ,
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -210,7 +245,11 @@ private fun InventoryItem(
             ) {
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = item.providerEmail,
+                    text = if (flagSensitiveData)
+                       "*".repeat(item.providerEmail.length)
+                    else
+                        item.providerEmail
+                               ,
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -219,7 +258,11 @@ private fun InventoryItem(
             ) {
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = item.providerPhoneNumber,
+                    text = if (flagSensitiveData)
+                        "*".repeat(item.providerPhoneNumber.length)
+                    else
+                        item.providerPhoneNumber
+                                ,
                     style = MaterialTheme.typography.titleMedium
                 )
             }

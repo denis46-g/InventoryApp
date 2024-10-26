@@ -33,7 +33,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -46,6 +50,7 @@ import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
+import com.example.inventory.ui.settings.SettingsViewModel
 import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 import java.util.Currency
@@ -176,17 +181,30 @@ fun ItemInputForm(
             enabled = enabled,
             singleLine = true
         )
+
+        val settings = SettingsViewModel()
+        // Помещаем флаги и состояния в Compose, чтобы они автоматически менялись
+        var flagDefaultQuantity by remember { mutableStateOf(settings.getCheckboxState(2)) }
+        // Состояние для количества
+        val defQuantity = settings.quantityState ?: ""
+
+        // Порог для выбора текста
+        val displayQuantity = if (flagDefaultQuantity) defQuantity else itemDetails.quantity
+
         OutlinedTextField(
-            value = itemDetails.quantity,
-            onValueChange = { onValueChange(itemDetails.copy(quantity = it)) },
+            value = displayQuantity,
+            onValueChange = {
+                flagDefaultQuantity = false
+                onValueChange(itemDetails.copy(quantity = it))
+                            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(stringResource(R.string.quantity_req)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor =
-                if (isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
+                if (flagDefaultQuantity || isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
                 else Color(0xFFFFC0CB),
                 unfocusedContainerColor =
-                if (isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
+                if (flagDefaultQuantity || isQuantityValid) MaterialTheme.colorScheme.secondaryContainer
                 else Color(0xFFFFC0CB),
                 disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
