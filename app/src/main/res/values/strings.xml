@@ -39,7 +39,10 @@
     <string name="provider_name_req">Provider Name*</string>
     <string name="provider_email_req">Provider Email*</string>
     <string name="provider_phone_number_req">Provider PhoneNumber*</string>
+    <string name="source">Source</string>
     <string name="save_action">Save</string>
+    <string name="save_action_to_file">Save to a file</string>
+    <string name="load_from_file">Load from the file</string>
     <string name="sell">Sell</string>
     <string name="yes">Yes</string>
     <string name="required_fields">*required fields</string>

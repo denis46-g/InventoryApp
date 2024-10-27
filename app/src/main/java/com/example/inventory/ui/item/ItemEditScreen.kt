@@ -55,6 +55,8 @@ fun ItemEditScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+    addItemPage = false
+
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -74,6 +76,7 @@ fun ItemEditScreen(
                     navigateBack()
                 }
             },
+            onLoadFromFileClick = {},
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),

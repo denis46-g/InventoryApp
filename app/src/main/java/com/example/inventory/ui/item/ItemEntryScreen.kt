@@ -16,6 +16,9 @@
 
 package com.example.inventory.ui.item
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -27,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -47,10 +52,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
+import com.example.inventory.MainActivity
 import com.example.inventory.R
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.settings.SettingsViewModel
+import com.example.inventory.ui.settings.context
 import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 import java.util.Currency
@@ -61,6 +68,8 @@ object ItemEntryDestination : NavigationDestination {
     override val titleRes = R.string.item_entry_title
 }
 
+var addItemPage : Boolean = false
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemEntryScreen(
@@ -70,6 +79,17 @@ fun ItemEntryScreen(
     viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    addItemPage = true
+
+    val loadFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        uri?.let {
+            coroutineScope.launch {
+                viewModel.loadFromFile(context, uri)
+                navigateBack()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -89,6 +109,10 @@ fun ItemEntryScreen(
                     navigateBack()
                 }
             },
+            onLoadFromFileClick = {
+                //viewModel.loadFromFile(context, uri = Uri)
+                loadFileLauncher.launch(arrayOf("application/octet-stream"))
+            },
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -106,8 +130,17 @@ fun ItemEntryBody(
     itemUiState: ItemUiState,
     onItemValueChange: (ItemDetails) -> Unit,
     onSaveClick: () -> Unit,
+    onLoadFromFileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    // Launcher для работы с документами (выбор зашифрованного файла)
+    /*val loadFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        uri?.let {
+            onLoadFromFileClick
+        }
+    }*/
+
     Column(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large)),
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium))
@@ -124,6 +157,17 @@ fun ItemEntryBody(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = stringResource(R.string.save_action))
+        }
+
+        if(addItemPage){
+            Button(
+                //onClick = { loadFileLauncher.launch(arrayOf("application/octet-stream")) },
+                onClick = onLoadFromFileClick,
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.load_from_file))
+            }
         }
     }
 }
@@ -280,6 +324,6 @@ private fun ItemEntryScreenPreview() {
             ItemDetails(
                 name = "Item name", price = "10.00", quantity = "5"
             )
-        ), onItemValueChange = {}, onSaveClick = {})
+        ), onItemValueChange = {}, onSaveClick = {}, onLoadFromFileClick = {})
     }
 }

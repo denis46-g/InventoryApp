@@ -17,7 +17,9 @@
 package com.example.inventory.ui.item
 
 import android.app.Activity
-import android.widget.Toast
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,7 +56,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -68,7 +69,6 @@ import com.example.inventory.data.Item
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.settings.SettingsViewModel
-import com.example.inventory.ui.settings.context
 import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 
@@ -120,10 +120,22 @@ fun ItemDetailsScreen(
             }
         }, modifier = modifier
     ) { innerPadding ->
+
+        val saveFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+            uri?.let {
+                // Сначала сохраняем в кэш
+                val cacheFile = viewModel.saveProductToCache(context, uiState.value.itemDetails.toItem(), uri)
+                // Затем записываем в Shared Storage
+                viewModel.writeCacheToSharedStorage(context, cacheFile, uri)
+                //viewModel.saveToFile(context, it, uiState.value.itemDetails.toItem())
+            }
+        }
+
         ItemDetailsBody(
             itemDetailsUiState = uiState.value,
             onSellItem = { viewModel.reduceQuantityByOne() },
             onShareItem = { viewModel.shareItem(context) },
+            onSaveToFile = { saveFileLauncher.launch("item") },
             onDelete = {
                 coroutineScope.launch {
                     viewModel.deleteItem()
@@ -146,6 +158,7 @@ private fun ItemDetailsBody(
     itemDetailsUiState: ItemDetailsUiState,
     onSellItem: () -> Unit,
     onShareItem: () -> Unit,
+    onSaveToFile: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -172,7 +185,7 @@ private fun ItemDetailsBody(
         ) {
             Text(stringResource(R.string.sell))
         }
-        OutlinedButton(
+        Button(
             onClick = onShareItem,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth(),
@@ -183,6 +196,13 @@ private fun ItemDetailsBody(
                 Text(stringResource(R.string.share))
             else
                 Text("Share (sending data is off with prohibit setting)")
+        }
+        Button(
+            onClick = onSaveToFile,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.save_action_to_file))
         }
         OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
@@ -223,6 +243,13 @@ fun ItemDetails(
                 dimensionResource(id = R.dimen.padding_medium)
             )
         ) {
+            ItemDetailsRow(
+                labelResID = R.string.source,
+                itemDetail = item.createdBy.toString(),
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
             ItemDetailsRow(
                 labelResID = R.string.item,
                 itemDetail = item.name,
@@ -325,6 +352,7 @@ fun ItemDetailsScreenPreview() {
             ),
             onSellItem = {},
             onShareItem = {},
+            onSaveToFile = {},
             onDelete = {}
         )
     }

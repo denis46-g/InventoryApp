@@ -58,6 +58,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
 import com.example.inventory.data.Item
+import com.example.inventory.data.Source
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.item.formatedPrice
 import com.example.inventory.ui.navigation.NavigationDestination
@@ -203,14 +204,23 @@ private fun InventoryItem(
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                //Spacer(Modifier.weight(1f))
+                Text(
+                    text = "Source: "+item.createdBy,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.titleLarge,
                 )
-                Spacer(Modifier.weight(1f))
                 Text(
-                    text = item.formatedPrice(),
-                    style = MaterialTheme.typography.titleMedium
+                    text = "  " + item.formatedPrice(),
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
             Text(

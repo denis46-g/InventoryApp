@@ -31,5 +31,11 @@ data class Item(
     val quantity: Int,
     val providerName: String,
     val providerEmail: String,
-    val providerPhoneNumber: String
+    val providerPhoneNumber: String,
+    var createdBy: Source = Source.MANUAL
 )
+
+enum class Source{
+    MANUAL,
+    FILE
+}

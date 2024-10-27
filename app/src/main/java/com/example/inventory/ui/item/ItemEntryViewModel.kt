@@ -16,13 +16,26 @@
 
 package com.example.inventory.ui.item
 
+import android.content.Context
+import android.net.Uri
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.room.PrimaryKey
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
+import com.example.inventory.data.Source
+import com.google.gson.Gson
+import kotlinx.coroutines.flow.last
+import java.security.KeyStore
 import java.text.NumberFormat
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
 
 /**
  * ViewModel to validate and insert items in the Room database.
@@ -58,6 +71,51 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
             itemsRepository.insertItem(itemUiState.itemDetails.toItem())
         }
     }
+
+    // Функция для загрузки файла
+    suspend fun loadFromFile(context: Context, uri: Uri) {
+        try {
+            val encryptedData = context.contentResolver.openInputStream(uri)?.readBytes() ?: throw Exception("Не удалось прочитать файл.")
+            val secretKey = getSecretKey(uri) // Получение секретного ключа
+            val decryptedData = decryptData(encryptedData, secretKey) // Расшифровка данных
+            val json = String(decryptedData, Charsets.UTF_8)
+            var itemDetails = Gson().fromJson(json, ItemDetails::class.java)
+
+            itemDetails.createdBy = Source.FILE
+            if(itemsRepository.getItemStream(itemDetails.id) != null)
+                itemDetails.id *= -1
+
+            // Сохранение itemDetails в вашей базе данных
+            updateUiState(itemDetails)
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Обработка ошибок
+        }
+    }
+
+    // Метод для получения секретного ключа
+    private fun getSecretKey(uri: Uri): SecretKey {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        //val keyStore = KeyStore.getInstance("AES")
+        val secretKey = keyStore.getKey("my_secret_key_$uri", null) as SecretKey
+
+        return secretKey
+    }
+
+    // Метод для расшифровки данных
+    private fun decryptData(encryptedData: ByteArray, secretKey: SecretKey): ByteArray {
+        val iv = ByteArray(16)
+        System.arraycopy(encryptedData, 0, iv, 0, iv.size)
+
+        val cipherText = ByteArray(encryptedData.size - iv.size)
+        System.arraycopy(encryptedData, iv.size, cipherText, 0, cipherText.size)
+
+        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
+
+        return cipher.doFinal(cipherText)
+    }
 }
 
 /**
@@ -69,13 +127,14 @@ data class ItemUiState(
 )
 
 data class ItemDetails(
-    val id: Int = 0,
+    var id: Int = 0,
     val name: String = "",
     val price: String = "",
     val quantity: String = "",
     val providerName: String = "",
     val providerEmail: String = "",
-    val providerPhoneNumber: String = ""
+    val providerPhoneNumber: String = "",
+    var createdBy: Source = Source.MANUAL
 )
 
 /**
@@ -90,7 +149,8 @@ fun ItemDetails.toItem(): Item = Item(
     quantity = quantity.toIntOrNull() ?: 0,
     providerName = providerName,
     providerEmail = providerEmail,
-    providerPhoneNumber = providerPhoneNumber
+    providerPhoneNumber = providerPhoneNumber,
+    createdBy = createdBy
 )
 
 fun Item.formatedPrice(): String {
@@ -115,5 +175,6 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
     quantity = quantity.toString(),
     providerName = providerName,
     providerEmail = providerEmail,
-    providerPhoneNumber = providerPhoneNumber
+    providerPhoneNumber = providerPhoneNumber,
+    createdBy = createdBy
 )
