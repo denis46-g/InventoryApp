@@ -29,6 +29,7 @@ import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
 import com.example.inventory.data.Source
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import java.security.KeyStore
 import java.text.NumberFormat
@@ -82,8 +83,16 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
             var itemDetails = Gson().fromJson(json, ItemDetails::class.java)
 
             itemDetails.createdBy = Source.FILE
-            if(itemsRepository.getItemStream(itemDetails.id) != null)
-                itemDetails.id *= -1
+            //val it: Item = itemDetails.toItem()
+            val it = itemsRepository.getAllItemsStream().first()
+            //if(itemsRepository.getItemStream(itemDetails.id) != null)
+                //itemDetails.id *= 1
+            var maxId = 1
+            for(i in it) {
+                if(i.id > maxId)
+                    maxId = i.id
+            }
+            itemDetails.id = maxId + 1
 
             // Сохранение itemDetails в вашей базе данных
             updateUiState(itemDetails)
