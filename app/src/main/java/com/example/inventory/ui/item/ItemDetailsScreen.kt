@@ -94,6 +94,9 @@ fun ItemDetailsScreen(
 
     val context = LocalContext.current as Activity
 
+    if(editItemPage)
+        editItemPage = false
+
     Scaffold(
         topBar = {
             InventoryTopAppBar(

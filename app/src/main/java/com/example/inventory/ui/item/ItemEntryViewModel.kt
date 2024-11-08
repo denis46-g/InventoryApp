@@ -139,7 +139,7 @@ data class ItemDetails(
     var id: Int = 0,
     val name: String = "",
     val price: String = "",
-    val quantity: String = "",
+    var quantity: String = "",
     val providerName: String = "",
     val providerEmail: String = "",
     val providerPhoneNumber: String = "",

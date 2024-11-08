@@ -69,6 +69,7 @@ object ItemEntryDestination : NavigationDestination {
 }
 
 var addItemPage : Boolean = false
+var flag: Boolean = false
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +82,7 @@ fun ItemEntryScreen(
     val coroutineScope = rememberCoroutineScope()
 
     addItemPage = true
+    flag = false
 
     val loadFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
@@ -233,7 +235,11 @@ fun ItemInputForm(
         val defQuantity = settings.quantityState ?: ""
 
         // Порог для выбора текста
-        val displayQuantity = if (flagDefaultQuantity) defQuantity else itemDetails.quantity
+        val displayQuantity = if (flagDefaultQuantity && !editItemPage) defQuantity else itemDetails.quantity
+        if(flagDefaultQuantity && !flag){
+            itemDetails.quantity = defQuantity
+            flag = true
+        }
 
         OutlinedTextField(
             value = displayQuantity,
